@@ -1,0 +1,36 @@
+{:duct.profile/base
+ {:duct.core/project-ns todo
+
+  :duct.router/ataraxy
+  {:routes
+   {[:get "/"] [:todo.handler/index]
+    [:get "/entries"] [:todo.handler.entries/list]}}
+  ; ↓と同等、:duct.router/ataraxyはハンドラーを自動設定してくれる
+  ; {:routes {[:get "/"] [:todo.handler/index]}
+  ;  :handlers {:todo.handler/index #ig/reg :todo.handler/index}}
+
+  ; ↓ composite key
+  ; :duct.handler.static/ok -> 静的ハンドラーのプロパティを継承する
+  [:duct.handler.static/ok :todo.handler/index]
+  {:body {:entries "/entries"}}
+  ; response -> {"entries": "/entries"}
+
+  [:duct.handler.sql/query :todo.handler.entries/list]
+  {:sql ["SELECT * FROM entries"]}
+
+  :duct.migrator/ragtime
+  {:migrations [#ig/ref :todo.migration/create-entries]}
+
+  [:duct.migrator.ragtime/sql :todo.migration/create-entries]
+  {:up ["CREATE TABLE entries (id INTEGER PRIMARY KEY, content TEXT)"]
+   :down ["DROP TABLE entries"]}}
+
+ ;; profile component
+ :duct.profile/dev   #duct/include "dev"
+ :duct.profile/local #duct/include "local"
+ :duct.profile/prod  {}
+
+ ;; module component
+ :duct.module/logging {}
+ :duct.module.web/api {}
+ :duct.module/sql {}}
