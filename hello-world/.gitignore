@@ -5,3 +5,4 @@
 *.class
 /.lein-*
 /.nrepl-port
+/.calva
